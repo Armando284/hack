@@ -3,11 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>hack</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#030811" />
+    <title>HACK.EXE — Nightfall Security Terminal</title>
+    <meta
+      name="description"
+      content="HACK.EXE: a retro night-blue terminal puzzler. Type commands to infiltrate the fictional NIGHTFALL network — scan, inspect, read logs, decode fields and dodge the watchdogs. Runs entirely in the browser."
+    />
+    <meta name="author" content="Armando" />
+    <meta
+      name="keywords"
+      content="hack, terminal, retro, puzzle, arcade, ctf, detective, browser game, hacker, command line"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="HACK.EXE" />
+    <meta property="og:title" content="HACK.EXE — Nightfall Security Terminal" />
+    <meta
+      property="og:description"
+      content="Discover commands, read fictional logs, decode shift fields and seize the data core — a self-contained command-line puzzle game."
+    />
   </head>
   <body>
-    <div id="app"></div>
+    <div class="frame">
+      <canvas id="game"></canvas>
+      <div id="boot">
+        <pre id="boot-text"></pre>
+      </div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
