@@ -1,60 +1,46 @@
+// HACK.EXE — entry point. Boot overlay, then hand off to the Game.
+
 import './style.css'
-import heroImg from './assets/hero.png'
-import typescriptLogo from './assets/typescript.svg'
-import viteLogo from './assets/vite.svg'
-import { setupCounter } from './counter.ts'
+import { Game } from './game.ts'
+import { Boot } from './boot.ts'
+import { createSfx } from './audio.ts'
+import { loadHighScore, loadSoundEnabled } from './persist.ts'
+import { Renderer } from './renderer.ts'
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from './constants.ts'
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-<section id="center">
-  <div class="hero">
-    <img src="${heroImg}" class="base" width="170" height="179">
-    <img src="${typescriptLogo}" class="framework" alt="TypeScript logo"/>
-    <img src="${viteLogo}" class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/main.ts</code> and save to test <code>HMR</code></p>
-  </div>
-  <button id="counter" type="button" class="counter"></button>
-</section>
+const canvas = document.getElementById('game')
 
-<div class="ticks"></div>
+if (!(canvas instanceof HTMLCanvasElement)) {
+	throw new Error('HACK.EXE: #game canvas not found')
+}
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#documentation-icon"></use></svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank">
-          <img class="logo" src="${viteLogo}" alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://www.typescriptlang.org" target="_blank">
-          <img class="button-icon" src="${typescriptLogo}" alt="">
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true"><use href="/icons.svg#social-icon"></use></svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li><a href="https://github.com/vitejs/vite" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#github-icon"></use></svg>GitHub</a></li>
-      <li><a href="https://chat.vite.dev/" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#discord-icon"></use></svg>Discord</a></li>
-      <li><a href="https://x.com/vite_js" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#x-icon"></use></svg>X.com</a></li>
-      <li><a href="https://bsky.app/profile/vite.dev" target="_blank"><svg class="button-icon" role="presentation" aria-hidden="true"><use href="/icons.svg#bluesky-icon"></use></svg>Bluesky</a></li>
-    </ul>
-  </div>
-</section>
+canvas.width = CANVAS_WIDTH
+canvas.height = CANVAS_HEIGHT
 
-<div class="ticks"></div>
-<section id="spacer"></section>
-`
+const ctx = canvas.getContext('2d')
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+if (!ctx) {
+	throw new Error('HACK.EXE: 2d context unavailable')
+}
+
+// The WebAudio context starts suspended until a user gesture; the boot press
+// doubles as the first gesture so we resume it there.
+const audioContext = new AudioContext()
+const sfx = createSfx(audioContext)
+
+const renderer = new Renderer(ctx)
+const storage = window.localStorage
+
+const game = new Game({ ctx, renderer, sfx, storage })
+
+export function launch(): void {
+	if (audioContext.state === 'suspended') {
+		void audioContext.resume()
+	}
+	game.start(loadHighScore(storage), loadSoundEnabled(storage))
+}
+
+const boot = new Boot()
+boot.start(() => {
+	launch()
+})
